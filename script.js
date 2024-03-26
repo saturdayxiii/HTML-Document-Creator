@@ -237,9 +237,9 @@ document.getElementById('text-type').addEventListener('change', function() {
 });
 
 
-const dfaltFontFamily = document.getElementById("normal-font-family");
-	const dfaltFontSizeInput = document.getElementById("normal-font-size");
-	const dfaltFontWeightInput = document.getElementById("normal-font-weight");
+const dfaltFontFamily = document.getElementById("default-font-family");
+	const dfaltFontSizeInput = document.getElementById("default-font-size");
+	const dfaltFontWeightInput = document.getElementById("default-font-weight");
 
 	let defaultFontSize = 1;
 	let defaultFontWeight = 100;
