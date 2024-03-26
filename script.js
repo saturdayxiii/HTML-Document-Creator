@@ -236,6 +236,37 @@ document.getElementById('text-type').addEventListener('change', function() {
   });
 });
 
+
+const dfaltFontFamily = document.getElementById("normal-font-family");
+	const dfaltFontSizeInput = document.getElementById("normal-font-size");
+	const dfaltFontWeightInput = document.getElementById("normal-font-weight");
+
+	let defaultFontSize = 1;
+	let defaultFontWeight = 100;
+
+	dfaltFontSizeInput.value = defaultFontSize;
+	dfaltFontWeightInput.value = defaultFontWeight;
+
+	// Reusable function to set style properties
+	function setStyleProperty(element, property, value) {
+	  element.style[property] = value;
+	  updateStyleDisplay();
+	}
+
+	// Event listener for all inputs
+	[dfaltFontFamily, dfaltFontSizeInput, dfaltFontWeightInput].forEach(input => {
+	  input.addEventListener("change", () => {
+		if (input === dfaltFontFamily) {
+		  setStyleProperty(currentPage, "fontFamily", input.value);
+		} else if (input === dfaltFontSizeInput) {
+		  setStyleProperty(currentPage, "fontSize", `${input.value}em`);
+		} else if (input === dfaltFontWeightInput) {
+		  setStyleProperty(currentPage, "fontWeight", input.value);
+		}
+	  });
+	});
+
+
 // Function to update styles
 function updateStyles(tagName, fontFamilyId, fontSizeId, fontWeightId, defaultFontSize, defaultFontWeight) {
   const elements = document.getElementsByTagName(tagName);
