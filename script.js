@@ -269,6 +269,7 @@ function updateStyles(tagName, fontFamilyId, fontSizeId, fontWeightId, defaultFo
 }
 
 // Update styles for different headings
+updateStyles('Default' 'default-font-family', 'default-font-size', 'default-font-weight', 1, 100);
 updateStyles('h1', 'h1-font-family', 'h1-font-size', 'h1-font-weight', 2, 900);
 updateStyles('h2', 'h2-font-family', 'h2-font-size', 'h2-font-weight', 1.5, 600);
 updateStyles('h3', 'h3-font-family', 'h3-font-size', 'h3-font-weight', 1, 600);
