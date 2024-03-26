@@ -1,0 +1,121 @@
+body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		background-color: rgba(50, 50, 50, 1);
+		color: white;
+		transition: background-color 0.3s ease;
+	}
+
+	#container {
+	}
+
+	#pages {
+		position: relative;
+		pointer-events: none;
+	}
+
+	.page {
+		margin: 0 auto;
+		color: black;
+		position: absolute;
+		top:0;
+		left:0;
+		box-sizing: border-box;
+	}
+
+	.pageSplit {
+		position: relative;
+		/* border-bottom: 1px solid rgba(0, 0, 0, 0.75); */
+		box-sizing: border-box;
+		z-index: 50;
+		pointer-events: none; /* Clicks will pass through this element */
+		page-break-after: always;
+	}
+	.marginhtop, .marginhbottom {
+		position: absolute;
+		width: 100%;
+		background-color: rgba(255,255,255,0.5);
+		border: 1px dashed rgba(0,0,0,0.5);
+		box-sizing: border-box;
+	}
+	.marginvleft, .marginvright {
+		position: absolute;
+		height: 100%;
+		background-color: rgba(255,255,255,0.5);
+		border: 1px dashed rgba(0,0,0,0.5);
+		box-sizing: border-box;
+	}
+
+	@media print {
+		.page {
+			border: none; /* Hide the border when printing */
+		}
+
+		.pageSplit {
+			border-bottom: none;
+		}
+		#marginpadding {
+		background-color: none;
+	}
+	}
+
+	#editor {
+		flex-direction: column;
+		padding: 10px;
+		border: 1px solid #ccc;
+		position: fixed;
+		right: 0;
+		top: 0;
+	}
+
+	#textedit {
+		width: 100%;
+		height: 30vh;
+	}
+
+	#text-input {
+		width: 95%;
+		height: 85%;
+	}
+
+	.titlebar {
+		width: 100%;
+		font-size: 0.8em;
+		font-weight: bold;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: rgba(255, 255, 255, 0.5);
+		padding: 3px;
+	}
+
+	#editoptions, #page-options, #paragraph-options {
+		padding: 5px;
+	}
+
+	#alignment-select {
+		margin-right: 10px;
+	}
+
+	#style-display {
+		width: 90%;
+		padding: 10px;
+		border: 1px solid #ccc;
+		white-space: pre-wrap;
+		overflow: auto;
+		max-height: 200px;
+		font-size: 14px;
+		position: relative;
+	}
+
+	.styled-block {
+		min-height: 1em;
+		cursor: pointer;
+	}
+
+	.styled-block.selected {
+		border: 1px solid #888888;
+		box-sizing: border-box;
+	}
+
+	#default-font-size, #default-font-weight, #h1-font-size, #h1-font-weight, #h2-font-size, #h2-font-weight, #h3-font-size, #h3-font-weight, #h4-font-size, #h4-font-weight, #page-width, #page-height, #page-padding-top, #page-padding-bottom, #page-padding-left, #page-padding-right {
+		width: 50px;
+	}

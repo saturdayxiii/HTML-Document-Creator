@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Doc Editor</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="container">
+	<div id="page"class="page">
+			<div id="blocks"></div>
+		</div>
+    <div id="pages">
+		<div class="pageSplit" style="border-bottom: 1px solid rgba(0,0,0,0.75);page-break-after:always;"><div class="marginhtop" style="top:0;"></div><div class="marginvleft" style="left:0;"></div><div class="marginvright" style="right:0;"></div><div class="marginhbottom" style="bottom:0;"></div></div>
+    </div>
+    <div id="editor">
+        <div id="textedit">
+            <textarea id="text-input" placeholder="Enter your text here..."></textarea>
+            <button id="submit-btn">Submit</button>
+            <button id="save-btn" disabled>Save</button>
+            <button id="delete-btn" disabled>Delete</button>
+            <button id="up-btn" disabled>Up</button>
+            <button id="down-btn" disabled>Down</button>
+        </div>
+        <div id="editoptions">
+			<div>
+				<label>BG Color:</label>
+				<input type="color" id="bg-color-picker">
+				<div class="titlebar" id="titlebar-tips">Tips</div>
+				<div id="tips" class="content" style="display: none;">
+					<table>
+						<tr>
+						<td>
+							&lt;b&gt;<b>Bold</b>&lt;/b&gt;<br>
+							&lt;i&gt;<i>Italic</i>&lt;/i&gt;<br>
+							&lt;strong&gt;<strong>Important</strong>&lt;/strong&gt;<br>
+							&lt;em&gt;<em>Emphasize</em>&lt;/em&gt;<br>
+							&lt;mark&gt;<mark>Highlight</mark>&lt;/mark&gt;<br>
+						</td>
+						<td>
+							&lt;small&gt;<small>Small</small>&lt;/small&gt;<br>
+							&lt;del&gt;<del>Delete</del>&lt;/del&gt;<br>
+							&lt;ins&gt;<ins>Insert</ins>&lt;/ins&gt;<br>
+							&lt;sup&gt;<sup>Superscript</sup>&lt;/sup&gt;<br>
+							&lt;sub&gt;<sub>Subscript</sub>&lt;/sub&gt;<br>
+						</td>
+						<td style="text-align:center">&lt;table style="border:1px solid black;text-align:center"&gt;<br>
+								<table style="border:1px solid black;text-align:center"><tr>
+									<th>&lt;tr&gt;</th>
+									<th>&lt;th&gt;Header&lt;/th&gt;</th>
+									<th>&lt;/tr&gt;</th>
+									</tr><tr>
+									<td>&lt;tr&gt;</td>
+									<td style="border:1px solid black">&lt;td style="border:1px solid black"&gt;cell&lt;/td&gt;</td>
+									<td>&lt;/tr&gt;</td>
+								</tr></table>
+								&lt;/table&gt;
+						</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="titlebar" id="titlebar-text-rules">Text Rules</div>
+			<div id="text-rules" class="content" style="display: block;">
+				<label>Type:</label>
+				<select id="text-type">
+					<option value="default">Default</option>
+					<option value="h1">Title</option>
+					<option value="h2">Heading</option>
+					<option value="h3">Subheading</option>
+					<option value="h4">Caption</option>
+				</select>
+				
+				<label>Font:</label>
+				  <select id="default-font-family">
+					<option value="Arial">Arial</option>
+					<option value="Times New Roman">Times New Roman</option>
+					<option value="Verdana">Verdana</option>
+					<option value="Helvetica">Helvetica</option>
+					<option value="Georgia">Georgia</option>
+					<option value="Garamond">Garamond</option>
+					<option value="Courier New">Courier New</option>
+					<option value="Brush Script MT">Brush Script MT</option>
+				  </select>
+				  <select id="h1-font-family"style="display:none">
+					<option value="Arial">Arial</option>
+					<option value="Times New Roman">Times New Roman</option>
+					<option value="Verdana">Verdana</option>
+					<option value="Helvetica">Helvetica</option>
+					<option value="Georgia">Georgia</option>
+					<option value="Garamond">Garamond</option>
+					<option value="Courier New">Courier New</option>
+					<option value="Brush Script MT">Brush Script MT</option>
+				  </select>
+				  <select id="h2-font-family"style="display:none">
+					<option value="Arial">Arial</option>
+					<option value="Times New Roman">Times New Roman</option>
+					<option value="Verdana">Verdana</option>
+					<option value="Helvetica">Helvetica</option>
+					<option value="Georgia">Georgia</option>
+					<option value="Garamond">Garamond</option>
+					<option value="Courier New">Courier New</option>
+					<option value="Brush Script MT">Brush Script MT</option>
+				  </select>
+				  <select id="h3-font-family"style="display:none">
+					<option value="Arial">Arial</option>
+					<option value="Times New Roman">Times New Roman</option>
+					<option value="Verdana">Verdana</option>
+					<option value="Helvetica">Helvetica</option>
+					<option value="Georgia">Georgia</option>
+					<option value="Garamond">Garamond</option>
+					<option value="Courier New">Courier New</option>
+					<option value="Brush Script MT">Brush Script MT</option>
+				  </select>
+				  <select id="h4-font-family"style="display:none">
+					<option value="Arial">Arial</option>
+					<option value="Times New Roman">Times New Roman</option>
+					<option value="Verdana">Verdana</option>
+					<option value="Helvetica">Helvetica</option>
+					<option value="Georgia">Georgia</option>
+					<option value="Garamond">Garamond</option>
+					<option value="Courier New">Courier New</option>
+					<option value="Brush Script MT">Brush Script MT</option>
+				  </select>
+				  <label>Size:</label>
+					<input type="number" id="default-font-size" step="0.01">
+					<input type="number" id="h1-font-size" step="0.01" style="display:none">
+					<input type="number" id="h2-font-size" step="0.01" style="display:none">
+					<input type="number" id="h3-font-size" step="0.01" style="display:none">
+					<input type="number" id="h4-font-size" step="0.01" style="display:none">
+				<label>Weight:</label>
+					<input type="number" id="default-font-weight" step="100">
+					<input type="number" id="h1-font-weight" step="100" style="display:none">
+					<input type="number" id="h2-font-weight" step="100" style="display:none">
+					<input type="number" id="h3-font-weight" step="100" style="display:none">
+					<input type="number" id="h4-font-weight" step="100" style="display:none">
+				<label>Underline:</label>
+				<input type="checkbox" id="default-uline" style="display:inline-block">
+			    <input type="checkbox" id="h1-uline" style="display:none">
+				<input type="checkbox" id="h2-uline" style="display:none">
+				<input type="checkbox" id="h3-uline" style="display:none">
+				<input type="checkbox" id="h4-uline" style="display:none">
+				
+			</div>
+			<div class="titlebar" id="titlebar-paragraph-options">Paragraph Options</div>
+			<div id="paragraph-options" class="content" style="display: block;">
+				<label>Assign:</label>
+				<select id="p-text-style">
+					<option value="default">Default</option>
+					<option value="h1">Title</option>
+					<option value="h2">Heading</option>
+					<option value="h3">Subheading</option>
+					<option value="h4">Caption</option>
+				</select>
+				Alignment: 
+				<select id="alignment-select">
+					<option value="left">Left</option>
+					<option value="center">Center</option>
+					<option value="right">Right</option>
+					<option value="justify">Justify</option>
+				</select>
+				<label>BG:</label>
+				<input type="color" id="block-color-picker">
+				<label>Text:</label>
+				<input type="color" id="block-text-color-picker">
+				<label>Outline:</label>
+			    <input type="checkbox" id="pbox-outline">
+			  
+			</div>
+			<div class="titlebar" id="titlebar-page-options">Page Options</div>
+			<div id="page-options" class="content" style="display: block;">			
+				<div>
+					<label>Width:</label>
+					<input type="number" id="page-width" step="0.05">
+					<label>Height:</label>
+					<input type="number" id="page-height" step="0.05">
+					<label>Page Color:</label>
+					<input type="color" id="page-color-picker">
+				</div>
+				<div>
+					<label>Top Margin:</label>
+					<input type="number" id="page-padding-top" step="0.05">
+					<label>Right Margin:</label>
+					<input type="number" id="page-padding-right" step="0.05">
+					<label>Bottom Margin:</label>
+					<input type="number" id="page-padding-bottom" step="0.05">
+					<label>Left Margin:</label>
+					<input type="number" id="page-padding-left" step="0.05">
+				</div>
+				<div>
+					<label>Page Text Color:</label>
+					<input type="color" id="page-text-color-picker">
+				</div>
+			</div>
+			<div class="titlebar" id="titlebar-export">Export</div>
+			<div id="export" class="content" style="display: block;">
+				<div id="button-container">
+					<button id="copy-btn" onclick="copyAll()">Copy</button>
+					<button id="save-html-btn" onclick="saveHtml()">Save</button>
+				</div>
+				<div id="style-display"></div>
+			</div>
+		</div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
