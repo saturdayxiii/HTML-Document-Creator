@@ -22,7 +22,7 @@ body {
 		page-break-after: always;
 		outline: 1px solid black;
 		border-color: rgba(0,0,0,0.25);
-		border-style: groove;
+		border-style: double;
 	}
 
 
