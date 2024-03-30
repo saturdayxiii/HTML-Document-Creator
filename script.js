@@ -1,3 +1,4 @@
+let fileName = "Document";
 let totalPages = 1;
 let currentPageNumber = 1;
 let styledBlockIdCounter = 1;
@@ -124,6 +125,7 @@ saveBtn.addEventListener("click", () => {
 		selectedBlock.style.textAlign = alignmentSelect.value;
 		
 		allBreechCheck();
+		getFileName();
 		updateStyleDisplay();
 		deselectBlock();
 	}
@@ -228,10 +230,7 @@ function createStyledBlock(styledText) {
     }
 	// update id if importing styled-block
 	let styledBlock;
-		console.log(styledText);
-		console.log(styledBlockId);
 	if (styledText.trim().startsWith("<div class=\"styled-block")) {
-		console.log('importing styled block')
 		const tempDiv = document.createElement('div');
 		tempDiv.innerHTML = styledText.trim();
 		tempDiv.firstChild.id = styledBlockId;
@@ -284,8 +283,6 @@ function orderBlocks() {
 }
 
 function renumberStyledBlocks(parentId, startId) {
-	console.log('renumbering started');
-	console.log(startId);
     const parentElement = document.getElementById(parentId);
     if (!parentElement) {
 		console.log('no parent found');
@@ -307,19 +304,16 @@ function renumberStyledBlocks(parentId, startId) {
 }
 
 function calculateBlockHeight(block) {
-    console.log('getting block height');
     let blockHeight = 0;
     const paragraphs = block.querySelectorAll("p");
     const lineHeight = parseInt(getComputedStyle(block).minHeight);
     const totalParagraphsHeight = paragraphs.length * lineHeight;
     blockHeight += totalParagraphsHeight;
     blockHeight += block.scrollHeight;
-    console.log(blockHeight);
     return blockHeight;
 }
 
 function allBreechCheck() {
-    console.log('checking yer breeches');
     const existingPages = document.querySelectorAll(".page");
     existingPages.forEach(page2check => {
         breechCheck(page2check);
@@ -603,14 +597,7 @@ function pageTraits() {
 	valu2px();
 	pageParent.style.width = `${pageWidthpx}px`;
 	const existingPages = document.querySelectorAll(".page");
-/* 	pageParent.style.width = `${pageWidthInput.value * 100}px`;
-	pageParent.style.height = `${pageHeightInput.value * 100}px`;
-	pageParent.style.paddingTop = `${pagePaddingTopInput.value * 100}px`;
-	pageParent.style.paddingRight = `${pagePaddingRightInput.value * 100}px`;
-	pageParent.style.paddingBottom = `${pagePaddingBottomInput.value * 100}px`;
-	pageParent.style.paddingLeft = `${pagePaddingLeftInput.value * 100}px`; */
 	existingPages.forEach(pagesplit => {		
-		//pagesplit.style.width = `${pageWidthInput.value * 100}px`;
 		pagesplit.style.height = `${pageHeightpx}px`;
 		pagesplit.style.borderTopWidth = `${pagePadToppx}px`;
 		pagesplit.style.borderLeftWidth = `${pagePadLeftpx}px`;
@@ -651,17 +638,29 @@ function copyAll() {
 	}, 1500);
 }
 function saveHtml() {
+	getFileName();
 	const styledContent = styleDisplay.textContent;
 	const blob = new Blob([styledContent], { type: "text/html" });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement("a");
 	a.href = url;
-	a.download = "styledContent.html";
+	a.download = `${fileName}.html`;
 	document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a);
 	URL.revokeObjectURL(url);
 }
+
+function getFileName() {
+    let element = document.getElementById('P00001');
+    let h1Text = element.querySelector('h1').textContent;
+    if (h1Text) {
+		fileName = h1Text.slice(0, 50);
+		fileName = fileName.replace(/[^\w\s]/gi, ''); // Remove non-word characters
+		document.title = fileName;
+	}
+}
+
 const styleDisplay = document.getElementById("style-display");
 function updateStyleDisplay() {
 	const prePagesContent = document.getElementById("pages").innerHTML;	
