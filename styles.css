@@ -1,7 +1,6 @@
 body {
 		font-family: Arial, sans-serif;
 		margin: 0;
-		background-color: rgba(50, 50, 50, 1);
 		color: white;
 		transition: background-color 0.3s ease;
 	}
@@ -11,52 +10,28 @@ body {
 
 	#pages {
 		position: relative;
-		pointer-events: none;
-	}
-
-	.page {
-		margin: 0 auto;
-		color: black;
-		position: absolute;
 		top:0;
 		left:0;
 		box-sizing: border-box;
+		color: black;
 	}
 
-	.pageSplit {
+	.page {
 		position: relative;
-		/* border-bottom: 1px solid rgba(0, 0, 0, 0.75); */
 		box-sizing: border-box;
-		z-index: 50;
-		pointer-events: none; /* Clicks will pass through this element */
 		page-break-after: always;
-	}
-	.marginhtop, .marginhbottom {
-		position: absolute;
-		width: 100%;
-		background-color: rgba(255,255,255,0.5);
-		border: 1px dashed rgba(0,0,0,0.5);
-		box-sizing: border-box;
-	}
-	.marginvleft, .marginvright {
-		position: absolute;
-		height: 100%;
-		background-color: rgba(255,255,255,0.5);
-		border: 1px dashed rgba(0,0,0,0.5);
-		box-sizing: border-box;
+		outline: 1px solid black;
+		border-color: rgba(0,0,0,0.25);
+		border-style: groove;
 	}
 
+
+	
 	@media print {
 		.page {
-			border: none; /* Hide the border when printing */
+			border: none;
+			outline: none;
 		}
-
-		.pageSplit {
-			border-bottom: none;
-		}
-		#marginpadding {
-		background-color: none;
-	}
 	}
 
 	#editor {
