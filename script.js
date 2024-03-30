@@ -1,3 +1,7 @@
+let totalPages = 1;
+let currentPageNumber = 1;
+let styledBlockIdCounter = 1;
+
 const bodybg = getComputedStyle(document.body);
 const BGcolorPicker = document.getElementById("bg-color-picker");
 BGcolorPicker.addEventListener("input", () => {
@@ -21,7 +25,7 @@ function calculateBrightness(color) {
 	return (r * 299 + g * 587 + b * 114) / 1000;
 }
 
-const affectedArea = document.getElementById("blocks");
+const affectedArea = document.getElementById("pages");
 const alignmentSelect = document.getElementById("alignment-select");
 let selectedBlock = null;
 affectedArea.addEventListener("click", (event) => {
@@ -71,24 +75,26 @@ const downBtn = document.getElementById("down-btn");
 submitBtn.addEventListener("click", () => {
 	const styledText = textInput.value;
 	let wrappedText = styledText;
-	if (wrappedText.startsWith("<div class=\"styled-block\"")) {
+	//this was for existing styled-blocks to be imported, a different method is probably needed based on styled-block ids
+	if (wrappedText.trim().startsWith("<div class=\"page\"")) {
 		affectedArea.insertAdjacentHTML("beforeend", wrappedText);
+		deleteEmptyPages();
 	} else {
-		const styledBlock = createStyledBlock(wrappedText);
-		if (selectedBlock) {
-			selectedBlock.insertAdjacentElement("afterend", styledBlock);
-		} else {
-			affectedArea.appendChild(styledBlock);
-		}
-		if (alignmentSelect.value !== "left") {
-			styledBlock.style.textAlign = alignmentSelect.value;
-		}
+		createStyledBlock(wrappedText);
 	}
-
 	updateStyleDisplay();
 	textInput.value = "<p></p>";
 	saveBtn.disabled = true;
 });
+
+function deleteEmptyPages() {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => {
+        if (page.children.length === 0) {
+            page.remove();
+        }
+    });
+}
 
 saveBtn.addEventListener("click", () => {
 	const tag = document.getElementById("p-text-style").value;
@@ -116,7 +122,8 @@ saveBtn.addEventListener("click", () => {
 	if (selectedBlock) {
 		selectedBlock.innerHTML = newText;
 		selectedBlock.style.textAlign = alignmentSelect.value;
-		updatePageHeight();
+		
+		allBreechCheck();
 		updateStyleDisplay();
 		deselectBlock();
 	}
@@ -128,25 +135,238 @@ deleteBtn.addEventListener("click", () => {
 		deselectBlock();
 	}
 });
+
 upBtn.addEventListener("click", () => {
-	if (selectedBlock) {
-		const prev = selectedBlock.previousElementSibling;
-		if (prev) {
-			selectedBlock.parentNode.insertBefore(selectedBlock, prev);
-			updateStyleDisplay();
-		}
-	}
+    if (selectedBlock) {
+        const tempId = selectedBlock.id;
+        const prev = selectedBlock.previousElementSibling;
+        if (prev) {
+            selectedBlock.id = prev.id;
+            prev.id = tempId;
+        } else {
+            const parentPrev = selectedBlock.parentElement.previousElementSibling;
+            if (parentPrev) {
+                const lastStyledBlock = parentPrev.querySelectorAll(".styled-block");
+                const lastId = lastStyledBlock[lastStyledBlock.length - 1].id;
+                const tempId = selectedBlock.id;
+                selectedBlock.id = lastId;
+                lastStyledBlock[lastStyledBlock.length - 1].id = tempId;
+				moveBlocks2Parents();
+            }
+        }
+        orderBlocks();
+		allBreechCheck();
+        updateStyleDisplay();
+    }
 });
+
+
 downBtn.addEventListener("click", () => {
-	if (selectedBlock) {
-		const next = selectedBlock.nextElementSibling;
-		if (next) {
-			selectedBlock.parentNode.insertBefore(next, selectedBlock);
-			updateStyleDisplay();
-		}
+    if (selectedBlock) {
+        const next = selectedBlock.nextElementSibling;
+        if (next) {
+            const tempId = selectedBlock.id;
+            selectedBlock.id = next.id;
+            next.id = tempId;
+        }
+		else {
+			//try less robust method
+			/* splitIds(selectedBlock);
+			const adjustedId = targetPageId - 1; //This is needed in this situation... brain too tired to know why.
+			if (moveBlock2NextPage(adjustedId, selectedBlock)) {
+				orderBlocks(); */
+			const parentNext = selectedBlock.parentElement.nextElementSibling;
+            if (parentNext) {
+                const parentFirstChild = parentNext.firstElementChild;
+                const tempId = selectedBlock.id;
+                selectedBlock.id = parentFirstChild.id;
+                parentFirstChild.id = tempId;
+				moveBlocks2Parents();
+            }
+        }
+        orderBlocks();
+		allBreechCheck();
+        updateStyleDisplay();
 	}
 });
 
+
+let targetOrderId = 0;
+let targetPageId = 0;
+let parentId = null;
+let orderId = null;
+let parentOrderId= null;
+
+function splitIds(block) {
+	targetOrderId = parseInt(block.id.substr(-3));
+	targetPageId = parseInt(block.id.slice(1, -4));
+	parentId = `P${String(targetPageId).padStart(5, '0')}`;
+	orderId = `O${String(targetOrderId).padStart(3, '0')}`;
+	parentOrderId= `${parentId}O${orderId}`;
+}
+
+function createStyledBlock(styledText) {
+    let styledBlockId;
+
+    if (selectedBlock) {
+        splitIds(selectedBlock);
+		const newIdNumber = targetOrderId + 1;
+        styledBlockId = `${parentId}O${String(newIdNumber).padStart(3, '0')}`;
+		renumberStyledBlocks(parentId, styledBlockId);
+    } else {
+        const pageCount = document.querySelectorAll('.page').length;
+        const paddedPageCount = String(pageCount).padStart(5, '0');
+        parentId = `P${paddedPageCount}`;
+        const parentElement = document.getElementById(parentId);
+        if (!parentElement) {
+            console.error(`Parent element with id '${parentId}' not found.`);
+            return;
+        }
+        const styledBlockCount = parentElement.querySelectorAll('.styled-block').length;
+        const paddedStyledBlockCount = String(styledBlockCount + 1).padStart(3, '0');
+        styledBlockId = `${parentId}O${paddedStyledBlockCount}`;
+    }
+	// update id if importing styled-block
+	let styledBlock;
+		console.log(styledText);
+		console.log(styledBlockId);
+	if (styledText.trim().startsWith("<div class=\"styled-block")) {
+		console.log('importing styled block')
+		const tempDiv = document.createElement('div');
+		tempDiv.innerHTML = styledText.trim();
+		tempDiv.firstChild.id = styledBlockId;
+		styledBlock = tempDiv.firstChild.outerHTML;
+		tempDiv.remove();
+	} else {
+		styledBlock = `<div class="styled-block" id="${styledBlockId}">${styledText}</div>`;
+	}
+    insertStyledBlock(styledBlock, parentId);
+}
+
+function insertStyledBlock(styledBlock, parentId) {
+    const parentElement = document.getElementById(parentId);
+    if (!parentElement) {
+        console.error(`Parent element with id '${parentId}' not found.`);
+        return;
+    }
+    parentElement.insertAdjacentHTML('beforeend', styledBlock);
+    
+	
+	orderBlocks();// order first, otherwise breechcheck will rename stuff
+	allBreechCheck();
+	updateStyleDisplay();
+}
+
+function moveBlocks2Parents() {
+    const styledBlocks = document.querySelectorAll('.styled-block');
+    styledBlocks.forEach(styledBlock => {
+        const parentId = styledBlock.id.slice(0, 6); // Get the first 6 characters of the styled block's ID
+        const parent = document.getElementById(parentId);
+        if (parent) {
+            parent.appendChild(styledBlock); // Move the styled block to its intended parent
+        }
+    });
+}
+
+function orderBlocks() {
+    const pageElements = document.querySelectorAll('.page');
+    pageElements.forEach(page => {
+        const styledBlockElements = Array.from(page.querySelectorAll('.styled-block'));
+        styledBlockElements.sort((a, b) => {
+            const idA = parseInt(a.id.slice(-3));
+            const idB = parseInt(b.id.slice(-3));
+            return idA - idB;
+        });
+        styledBlockElements.forEach((styledBlock, index) => {
+            page.appendChild(styledBlock); // Move the element to the end of the parent
+        });
+    });
+}
+
+function renumberStyledBlocks(parentId, startId) {
+	console.log('renumbering started');
+	console.log(startId);
+    const parentElement = document.getElementById(parentId);
+    if (!parentElement) {
+		console.log('no parent found');
+		return;
+	}
+    // Find the index of the starting ID
+    const startIndex = Array.from(parentElement.children).findIndex(child => child.id === startId);
+    if (startIndex === -1) {
+		console.log('start index not found');
+		return;
+	}
+    let currentId = startId;
+    for (let i = startIndex; i < parentElement.children.length; i++) {
+        const block = parentElement.children[i];
+        const lastThreeDigits = parseInt(block.id.substr(-3));
+        const newIdNumber = lastThreeDigits + 1;
+        block.id = `${parentId}O${String(newIdNumber).padStart(3, '0')}`;
+    }
+}
+
+function calculateBlockHeight(block) {
+    console.log('getting block height');
+    let blockHeight = 0;
+    const paragraphs = block.querySelectorAll("p");
+    const lineHeight = parseInt(getComputedStyle(block).minHeight);
+    const totalParagraphsHeight = paragraphs.length * lineHeight;
+    blockHeight += totalParagraphsHeight;
+    blockHeight += block.scrollHeight;
+    console.log(blockHeight);
+    return blockHeight;
+}
+
+function allBreechCheck() {
+    console.log('checking yer breeches');
+    const existingPages = document.querySelectorAll(".page");
+    existingPages.forEach(page2check => {
+        breechCheck(page2check);
+    });
+}
+
+function breechCheck(page2check) {
+    let totalHeight = 0;
+    const pageIdNum = parseInt(page2check.id.slice(1, -4));
+    const styledBlocks = page2check.querySelectorAll(".styled-block");
+    const movingBlock = styledBlocks[styledBlocks.length - 1];
+
+    styledBlocks.forEach(block => {
+        totalHeight += calculateBlockHeight(block);
+    });
+
+    const compareHeight = pageHeightpx - pagePadToppx - pagePadBottompx;
+    if (totalHeight > compareHeight) {
+		//page breeched
+        if (moveBlock2NextPage(pageIdNum, movingBlock)) {
+            orderBlocks();
+        } else {
+            //new page needed
+            totalPages++;
+            generatePage();
+            pageTraits();
+            orderBlocks();
+            moveBlock2NextPage(pageIdNum, movingBlock);
+        }
+    }
+}
+
+function moveBlock2NextPage(pageIdNum, movingBlock) {
+    const existingPages = document.querySelectorAll(".page");
+    const nextPageNumber = String(pageIdNum + 2).padStart(5, "0");
+    const firstBlockId = `P${nextPageNumber}O001`;
+
+    if (pageIdNum + 1 < existingPages.length) {
+        const nextPage = existingPages[pageIdNum + 1];
+        renumberStyledBlocks(nextPage.id, firstBlockId);
+        movingBlock.id = `${nextPage.id}O001`;
+        nextPage.appendChild(movingBlock);
+        return true; // Return true if block was successfully moved
+    } else {
+        return false; // Return false if there is no next page
+    }
+}
 
 const titlebars = document.querySelectorAll('.titlebar');
 // Add click event listener to each title bar
@@ -165,8 +385,7 @@ titlebars.forEach(titlebar => {
 	});
 });
 
-
-const currentPage = document.querySelector(".page");
+const pageParent = document.getElementById("pages");
 const pageWidthInput = document.getElementById("page-width");
 const pageHeightInput = document.getElementById("page-height");
 const pagePaddingTopInput = document.getElementById("page-padding-top");
@@ -175,7 +394,8 @@ const pagePaddingBottomInput = document.getElementById("page-padding-bottom");
 const pagePaddingLeftInput = document.getElementById("page-padding-left");
 const pageColorPicker = document.getElementById("page-color-picker");
 const pageTextColorPicker = document.getElementById("page-text-color-picker");
-let totalPages = 1;
+
+let bgColor = "rgba(50, 50, 50, 1)"
 let pageWidth = 8.5; 
 let pageHeight = 11; 
 let pagePaddingTop = 0.25; 
@@ -185,6 +405,7 @@ let pagePaddingLeft = 0.25;
 let pageBackgroundColor = "#ffffff"; 
 let pageTextColor = "#000000";
 
+
 pageWidthInput.value = pageWidth;
 pageHeightInput.value = pageHeight;
 pagePaddingTopInput.value = pagePaddingTop;
@@ -193,24 +414,31 @@ pagePaddingBottomInput.value = pagePaddingBottom;
 pagePaddingLeftInput.value = pagePaddingLeft;
 pageColorPicker.value = pageBackgroundColor;
 pageTextColorPicker.value = pageTextColor;
-currentPage.style.backgroundColor = pageBackgroundColor;
-currentPage.style.color = pageTextColor;
-currentPage.style.fontFamily = `Arial`;
-currentPage.style.fontSize = `1em`;
-currentPage.style.fontWeight = 100;
 
+document.body.style.backgroundColor = bgColor;
+pageParent.style.backgroundColor = pageBackgroundColor;
+pageParent.style.color = pageTextColor;
+pageParent.style.fontFamily = `Arial`;
+pageParent.style.fontSize = `1em`;
+pageParent.style.fontWeight = 100;
+// move color pickers into pageTraits
 pageColorPicker.addEventListener("input", () => {
-	const selectedColor = pageColorPicker.value;
+	const selectedColor = pageColorPicker.value
+	const existingPages = document.querySelectorAll(".page");
 	if (selectedColor) {
-		currentPage.style.backgroundColor = selectedColor;
-		updateStyleDisplay();
+		//existingPages.forEach(pagesplit => {	
+		//	pagesplit.style.backgroundColor = selectedColor;})
+		pageBackgroundColor = selectedColor;
+		pageParent.style.backgroundColor = selectedColor;
+		
+	updateStyleDisplay();
 	}
 });
 pageTextColorPicker.addEventListener("input", () => {
 	const selectedColor = pageTextColorPicker.value;
 	if (selectedColor) {
 		pageTextColor = selectedColor; // Update the pageTextColor variable
-		document.querySelector(".page").style.color = pageTextColor; // Update the text color for .page
+		pageParent.style.color = pageTextColor; // Update the text color for .page
 		updateStyleDisplay();
 	}
 });
@@ -238,37 +466,37 @@ document.getElementById('text-type').addEventListener('change', function() {
 
 
 const dfaltFontFamily = document.getElementById("default-font-family");
-	const dfaltFontSizeInput = document.getElementById("default-font-size");
-	const dfaltFontWeightInput = document.getElementById("default-font-weight");
+const dfaltFontSizeInput = document.getElementById("default-font-size");
+const dfaltFontWeightInput = document.getElementById("default-font-weight");
 
-	let defaultFontSize = 1;
-	let defaultFontWeight = 100;
+let defaultFontSize = 1;
+let defaultFontWeight = 100;
 
-	dfaltFontSizeInput.value = defaultFontSize;
-	dfaltFontWeightInput.value = defaultFontWeight;
+dfaltFontSizeInput.value = defaultFontSize;
+dfaltFontWeightInput.value = defaultFontWeight;
 
-	// Reusable function to set style properties
-	function setStyleProperty(element, property, value) {
-	  element.style[property] = value;
-	  updateStyleDisplay();
+// Reusable function to set style properties
+function setStyleProperty(element, property, value) {
+  element.style[property] = value;
+  updateStyleDisplay();
+}
+
+// Event listener for all inputs
+[dfaltFontFamily, dfaltFontSizeInput, dfaltFontWeightInput].forEach(input => {
+  input.addEventListener("change", () => {
+	if (input === dfaltFontFamily) {
+	  setStyleProperty(pageParent, "fontFamily", input.value);
+	} else if (input === dfaltFontSizeInput) {
+	  setStyleProperty(pageParent, "fontSize", `${input.value}em`);
+	} else if (input === dfaltFontWeightInput) {
+	  setStyleProperty(pageParent, "fontWeight", input.value);
 	}
-
-	// Event listener for all inputs
-	[dfaltFontFamily, dfaltFontSizeInput, dfaltFontWeightInput].forEach(input => {
-	  input.addEventListener("change", () => {
-		if (input === dfaltFontFamily) {
-		  setStyleProperty(currentPage, "fontFamily", input.value);
-		} else if (input === dfaltFontSizeInput) {
-		  setStyleProperty(currentPage, "fontSize", `${input.value}em`);
-		} else if (input === dfaltFontWeightInput) {
-		  setStyleProperty(currentPage, "fontWeight", input.value);
-		}
-	  });
-	});
+  });
+});
 
 
 // Function to update styles
-function updateStyles(tagName, fontFamilyId, fontSizeId, fontWeightId, defaultFontSize, defaultFontWeight) {
+function updateFonts(tagName, fontFamilyId, fontSizeId, fontWeightId, defaultFontSize, defaultFontWeight) {
   const elements = document.getElementsByTagName(tagName);
   const fontFamily = document.getElementById(fontFamilyId);
   const fontSizeInput = document.getElementById(fontSizeId);
@@ -300,21 +528,20 @@ function updateStyles(tagName, fontFamilyId, fontSizeId, fontWeightId, defaultFo
 }
 
 // Update styles for different headings
-updateStyles('h1', 'h1-font-family', 'h1-font-size', 'h1-font-weight', 2, 900);
-updateStyles('h2', 'h2-font-family', 'h2-font-size', 'h2-font-weight', 1.5, 600);
-updateStyles('h3', 'h3-font-family', 'h3-font-size', 'h3-font-weight', 1, 600);
-updateStyles('h4', 'h4-font-family', 'h4-font-size', 'h4-font-weight', 0.75, 100);
+updateFonts('h1', 'h1-font-family', 'h1-font-size', 'h1-font-weight', 2, 900);
+updateFonts('h2', 'h2-font-family', 'h2-font-size', 'h2-font-weight', 1.5, 600);
+updateFonts('h3', 'h3-font-family', 'h3-font-size', 'h3-font-weight', 1, 600);
+updateFonts('h4', 'h4-font-family', 'h4-font-size', 'h4-font-weight', 0.75, 100);
 
 // Event listener for underline checkboxes
 document.querySelectorAll('#text-rules input[id$="-uline"]').forEach(checkbox => {
   checkbox.addEventListener('change', function() {
     const tagName = checkbox.id.split('-')[0];
     const isdefault = tagName === 'default';
-    const page = document.querySelector('.page');
 
     const textDecoration = checkbox.checked ? 'underline' : 'none';
     if (isdefault) {
-      page.style.textDecoration = textDecoration;
+      pageParent.style.textDecoration = textDecoration;
     } else {
       document.querySelectorAll(tagName).forEach(heading => {
         heading.style.textDecoration = textDecoration;
@@ -323,9 +550,6 @@ document.querySelectorAll('#text-rules input[id$="-uline"]').forEach(checkbox =>
     updateStyleDisplay();
   });
 });
-
-
-
 
 //
 const blockColorPicker = document.getElementById("block-color-picker");
@@ -351,226 +575,152 @@ editOptions.addEventListener("input", function(event) {
     }
   }
 });
-
 	
+function updateEditorWidth() {
+	const totalPageWidth = pageWidthpx + pagePadLeftpx + pagePadRightpx;
+	const editorWidth = `calc(100vw - ${totalPageWidth}px - 20px)`; // Subtract the total page width and padding from the viewport width
+	editor.style.width = editorWidth;
+}
+
+
+let pageWidthpx = 0
+let pageHeightpx = 0
+let pagePadToppx = 0
+let pagePadLeftpx = 0
+let pagePadRightpx = 0
+let pagePadBottompx = 0
 	
-	function updateEditorWidth() {
-		const pageWidth = parseFloat(pageWidthInput.value);
-		const pageMarginLeft = parseFloat(pagePaddingLeftInput.value);
-		const pageMarginRight = parseFloat(pagePaddingRightInput.value);
+function valu2px() {
+	pageWidthpx = pageWidthInput.value * 100;
+	pageHeightpx = pageHeightInput.value * 100;
+	pagePadToppx = pagePaddingTopInput.value * 100;
+	pagePadLeftpx = pagePaddingLeftInput.value * 100;
+	pagePadRightpx = pagePaddingRightInput.value * 100;
+	pagePadBottompx = pagePaddingBottomInput.value * 100;
+}
 
-		const totalPageWidth = pageWidth * 100 + pageMarginLeft * 100 + pageMarginRight * 100;
-		const editorWidth = `calc(100vw - ${totalPageWidth}px - 20px)`; // Subtract the total page width and padding from the viewport width
-		editor.style.width = editorWidth;
-	}
-	updateEditorWidth();
-	
-
-	function createStyledBlock(styledText) {
-		const block = document.createElement("div");
-		block.classList.add("styled-block");
-		// this breaks html returning to editor. block.dataset.text = textInput.value;
-		block.innerHTML = styledText;
-		
-		currentPage.appendChild(block);
-		updatePageHeight();
-
-		return block;
-	}
-
-	function calculateTotalBlocksHeight() {
-		const styledBlocks = document.querySelectorAll(".styled-block");
-		let totalBlocksHeight = 0;
-
-		styledBlocks.forEach(block => {
-			const paragraphs = block.querySelectorAll("p");
-			const blockStyles = getComputedStyle(block);
-			const paragraphsHeight = paragraphs.length * parseFloat(blockStyles.fontSize);
-			totalBlocksHeight += block.offsetHeight + paragraphsHeight + 
-				parseFloat(blockStyles.marginTop) +
-				parseFloat(blockStyles.marginBottom) +
-				parseFloat(blockStyles.paddingTop) +
-				parseFloat(blockStyles.paddingBottom);
-		});
-		console.log(totalBlocksHeight);
-		return totalBlocksHeight;
-	}
-
-	function pageTraits() {
-		currentPage.style.width = `${pageWidthInput.value * 100}px`;
-		currentPage.style.height = `${pageHeight * 100}px`;
-		currentPage.style.paddingTop = `${pagePaddingTopInput.value * 100}px`;
-		currentPage.style.paddingRight = `${pagePaddingRightInput.value * 100}px`;
-		currentPage.style.paddingBottom = `${pagePaddingBottomInput.value * 100}px`;
-		currentPage.style.paddingLeft = `${pagePaddingLeftInput.value * 100}px`;
-	}
-
-	// Add event listeners to update styles
-	// Update page height when input values change
-	const pageOptions = document.getElementById("page-options");
-	pageOptions.addEventListener("input", function(event) {
-		const target = event.target;
-		if (target.matches("#page-width, #page-height, #page-padding-top, #page-padding-right, #page-padding-bottom, #page-padding-left, #page-color-picker, #page-text-color-picker")) {
-			updatePageHeight();
-		}
+function pageTraits() {
+	valu2px();
+	pageParent.style.width = `${pageWidthpx}px`;
+	const existingPages = document.querySelectorAll(".page");
+/* 	pageParent.style.width = `${pageWidthInput.value * 100}px`;
+	pageParent.style.height = `${pageHeightInput.value * 100}px`;
+	pageParent.style.paddingTop = `${pagePaddingTopInput.value * 100}px`;
+	pageParent.style.paddingRight = `${pagePaddingRightInput.value * 100}px`;
+	pageParent.style.paddingBottom = `${pagePaddingBottomInput.value * 100}px`;
+	pageParent.style.paddingLeft = `${pagePaddingLeftInput.value * 100}px`; */
+	existingPages.forEach(pagesplit => {		
+		//pagesplit.style.width = `${pageWidthInput.value * 100}px`;
+		pagesplit.style.height = `${pageHeightpx}px`;
+		pagesplit.style.borderTopWidth = `${pagePadToppx}px`;
+		pagesplit.style.borderLeftWidth = `${pagePadLeftpx}px`;
+		pagesplit.style.borderRightWidth = `${pagePadRightpx}px`;
+		pagesplit.style.borderBottomWidth = `${pagePadBottompx}px`;
 	});
+	updateEditorWidth();
+}
 
-	function updatePageHeight() {
-		// Calculate totalBlocksHeight
-		const totalBlocksHeight = calculateTotalBlocksHeight();
-		// Calculate totalPages based on totalBlocksHeight and currentPageHeight
-		const currentPageHeight = parseFloat(getComputedStyle(currentPage).height);
-		const pageWidth = parseFloat(pageWidthInput.value);
-		const pageHeight = parseFloat(pageHeightInput.value);
-		if (totalBlocksHeight > currentPageHeight) {
-			totalPages++;
-		}
-		// Generate additional pageSplit divs if needed
-		const pagesDiv = document.getElementById("pages");
-		const existingPageSplits = document.querySelectorAll(".pageSplit");
-		const existingMarginhtops = document.querySelectorAll(".marginhtop");
-		const existingMarginhbottoms = document.querySelectorAll(".marginhbottom");
-		const existingMarginvlefts = document.querySelectorAll(".marginvleft");
-		const existingMarginvrights = document.querySelectorAll(".marginvright");
-		for (let i = existingPageSplits.length; i < totalPages; i++) {
-			const newPageSplit = document.createElement("div");
-			const newmarginhtop = document.createElement("div");
-			const newmarginhbottom = document.createElement("div");
-			const newmarginvleft = document.createElement("div");
-			const newmarginvright = document.createElement("div");
-			newPageSplit.classList.add("pageSplit");
-			newmarginhtop.classList.add("marginhtop");
-			newmarginhbottom.classList.add("marginhbottom");
-			newmarginvleft.classList.add("marginvleft");
-			newmarginvright.classList.add("marginvright");
-			// Set position based on index and page height
-			newPageSplit.style.width = `${pageWidth * 100}px`;
-			newPageSplit.style.pageBreakAfter = `always`;
-			pagesDiv.appendChild(newPageSplit);
-			// Set marginh styles
-			newmarginhtop.style.height = `${pagePaddingTopInput.value * 100}px`;
-			newmarginhtop.style.top = `0`;
-			newmarginhbottom.style.height = `${pagePaddingBottomInput.value * 100}px`;
-			newmarginhbottom.style.bottom = `0`;
-			newmarginvleft.style.width = `${pagePaddingLeftInput.value * 100}px`;
-			newmarginvleft.style.left = `0`;
-			newmarginvright.style.width = `${pagePaddingRightInput.value * 100}px`;
-			newmarginvright.style.right = `0`;		
-			// Add marginh elements into the newPageSplit
-			newPageSplit.appendChild(newmarginhtop);
-			newPageSplit.appendChild(newmarginhbottom);
-			newPageSplit.appendChild(newmarginvleft);
-			newPageSplit.appendChild(newmarginvright);
-		}
-		// Set styles for currentPage
+// Add event listeners to update styles
+// Update page height when input values change
+const pageOptions = document.getElementById("page-options");
+pageOptions.addEventListener("input", function(event) {
+	const target = event.target;
+	if (target.matches("#page-width, #page-height, #page-padding-top, #page-padding-right, #page-padding-bottom, #page-padding-left, #page-color-picker, #page-text-color-picker")) {
 		pageTraits();
-		currentPage.style.height = `${totalPages * pageHeight * 100}px`; //redo height to include total pages
-		// Update existing divs
-		existingPageSplits.forEach(pagesplit => {
-			pagesplit.style.height = `${pageHeight * 100}px`;
-			pagesplit.style.width = `${pageWidth * 100}px`;
-		});
-		existingMarginhtops.forEach(marginhtop => {
-				marginhtop.style.height = `${pagePaddingTopInput.value * 100}px`;
-		});
-		existingMarginhbottoms.forEach(marginhbottom => {
-				marginhbottom.style.height = `${pagePaddingBottomInput.value * 100}px`;
-		});
-		existingMarginvlefts.forEach(marginvleft => {
-				marginvleft.style.width = `${pagePaddingLeftInput.value * 100}px`;
-		});
-		existingMarginvrights.forEach(marginvright => {
-				marginvright.style.width = `${pagePaddingRightInput.value * 100}px`;
-		});
+	}
+});
 
-		updateStyleDisplay();
-	}
+function generatePage() {
+	const pagesDiv = document.getElementById("pages");
+	const newPage = document.createElement("div");
+	newPage.classList.add("page");
+	newPage.id = `P${(totalPages).toString().padStart(5, '0')}`;
+	pagesDiv.appendChild(newPage);
+}
+
+// Set the initial values for inputs---will need to check for existin styled-blocks and .pages here.
+
+generatePage();
+pageTraits();
+
+function copyAll() {
+	navigator.clipboard.writeText(styleDisplay.textContent);
+	document.getElementById("copy-btn").textContent = "";
+	setTimeout(() => {
+		document.getElementById("copy-btn").textContent = "Copy All";
+	}, 1500);
+}
+function saveHtml() {
+	const styledContent = styleDisplay.textContent;
+	const blob = new Blob([styledContent], { type: "text/html" });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = "styledContent.html";
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}
+const styleDisplay = document.getElementById("style-display");
+function updateStyleDisplay() {
+	const prePagesContent = document.getElementById("pages").innerHTML;	
+	const pagesContent = prePagesContent.replace(/styled-block selected/g, "styled-block");
+	let styles = "";
+	// Get styles for body and .page
+	const bodyStyles = window.getComputedStyle(document.body);
+	const pagesStyles = getComputedStyle(document.getElementById('pages'));
 	
-	const pageContent = document.querySelector("#page").innerHTML;
-	const styleDisplay = document.getElementById("style-display");
-	// Set the initial values for inputs
-	pageTraits();
-	updatePageHeight();
-	function copyAll() {
-		navigator.clipboard.writeText(styleDisplay.textContent);
-		document.getElementById("copy-btn").textContent = "";
-		setTimeout(() => {
-			document.getElementById("copy-btn").textContent = "Copy All";
-		}, 1500);
-	}
-	function saveHtml() {
-		const styledContent = styleDisplay.textContent;
-		const blob = new Blob([styledContent], { type: "text/html" });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = "styledContent.html";
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	}
-	function updateStyleDisplay() {
-		const pagesContent = document.getElementById("pages").innerHTML;
-		const blockContent = document.getElementById("blocks").innerHTML;
-		const styledBlocks = document.querySelectorAll(".styled-block");
-		let html = "";
-		// ---
-		
-		let styles = "";
-		// Get styles for body and .page
-		const bodyStyles = window.getComputedStyle(document.body);
-		const pageStyles = window.getComputedStyle(document.querySelector(".page"));
-		
-		// Body styles
-		styles += `
-			body {
-				background-color: ${bodyStyles.backgroundColor};
-			}
-		`;
-		
-		// Page styles
-		styles += `
-			.page {
-				position: absolute;
-				top: 0;
-				left: 0;
-				margin: 0 auto;
-				box-sizing: border-box;
-				width: ${pageStyles.width};
-				height: ${pageStyles.height};
-				padding-top: ${pageStyles.paddingTop};
-				padding-right: ${pageStyles.paddingRight};
-				padding-bottom: ${pageStyles.paddingBottom};
-				padding-left: ${pageStyles.paddingLeft};
-				background-color: ${pageStyles.backgroundColor};
-				color: ${pageStyles.color};
-				font-family: ${pageStyles.fontFamily};
-				font-size: ${pageStyles.fontSize};
-				font-weight: ${pageStyles.fontWeight};
-			}
-		`;
-		
-		// Other Styles
-		styles += `
-			.styled-block {
-				min-height: ${pageStyles.fontSize};
-			}
-			.pageSplit {
-				position: relative;
-				box-sizing: border-box;
-				z-index: 50;
-				pointer-events: none;
-				page-break-after: always;
-			}
-			@media print {
-				.pageSplit {
-					border-bottom: none;
-				}
-			}
-		`;
-		// update style display
-		const styleDisplay = document.getElementById("style-display");
-		styleDisplay.textContent = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<style>${styles}</style>\n</head>\n<body>\n<div class="page">\n${blockContent}\n</div>\n<div style="position:absolute;top:0;left:0;">${pagesContent}</div>\n</body>\n</html>`;
+	// Body styles
+	styles += `
+		body {
+			background-color: ${bodyStyles.backgroundColor};
 		}
-		
+	`;
+	
+	// Page styles
+	styles += `
+		#pages {
+			position: absolute;
+			top: 0;
+			left: 0;
+			margin: 0 auto;
+			box-sizing: border-box;
+			background-color: ${pagesStyles.backgroundColor};
+			color: ${pagesStyles.color};
+			font-family: ${pagesStyles.fontFamily};
+			font-size: ${pagesStyles.fontSize};
+			font-weight: ${pagesStyles.fontWeight};
+			
+		}
+	`;
+	
+	// Other Styles
+	styles += `
+		.styled-block {
+			min-height: ${pagesStyles.fontSize};
+		}
+		.page {
+			position: relative;
+			width: ${pagesStyles.width};
+			box-sizing: border-box;
+			page-break-after: always;
+			
+			padding-top: ${pagePadToppx}px;
+			padding-left: ${pagePadLeftpx}px;
+			padding-right: ${pagePadRightpx}px;
+			padding-bottom: ${pagePadBottompx}px;
+			
+			outline: 1px solid black;
+		}
+		@media print {
+			.page {
+				border: none;
+				outline: none;
+			}
+		}
+	`;
+	// update style display
+	const styleDisplay = document.getElementById("style-display");
+	styleDisplay.textContent = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<style>${styles}</style>\n</head>\n<body>\n<div id="pages">\n<!-- ---------------start import--------------- -->\n${pagesContent}\n\n<!-----------------End Import--------------- -->\n</div>\n</body>\n</html>`;
+}
