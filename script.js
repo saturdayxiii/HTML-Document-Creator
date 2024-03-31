@@ -657,7 +657,7 @@ function getFileName() {
     if (h1Text) {
 		fileName = h1Text.slice(0, 50);
 		fileName = fileName.replace(/[^\w\s]/gi, ''); // Remove non-word characters
-		document.title = fileName;
+		document.title = `${fileName} - HTML-Document-Editor`;
 	}
 }
 
@@ -723,3 +723,131 @@ function updateStyleDisplay() {
 	const styleDisplay = document.getElementById("style-display");
 	styleDisplay.textContent = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<style>${styles}</style>\n</head>\n<body>\n<div id="pages">\n<!-- ---------------start import--------------- -->\n${pagesContent}\n\n<!-----------------End Import--------------- -->\n</div>\n</body>\n</html>`;
 }
+
+// css filter script
+
+	let img = "";
+	const imageUrlInput = document.getElementById('image-url');
+  const loadButton = document.getElementById('load-button');
+  const image = document.getElementById('image');
+  const zoomInput = document.getElementById('zoom');
+  const zoomValueSpan = document.getElementById('zoom-value');
+  const rotationInput = document.getElementById('rotation');
+  const rotationValueSpan = document.getElementById('rotation-value');
+  const brightnessInput = document.getElementById('brightness');
+  const brightnessValueSpan = document.getElementById('brightness-value');
+  const contrastInput = document.getElementById('contrast');
+  const contrastValueSpan = document.getElementById('contrast-value');
+  const hueInput = document.getElementById('hue');
+  const hueValueSpan = document.getElementById('hue-value');
+  const saturateInput = document.getElementById('saturate');
+  const saturateValueSpan = document.getElementById('saturate-value');
+  const invert = document.getElementById('invert');
+  const blurInput = document.getElementById('blur');
+  const blurValueSpan = document.getElementById('blur-value');
+  const revertButton = document.getElementById('revert-button');
+
+  loadButton.addEventListener('click', loadNewImage);
+  zoomInput.addEventListener('input', updateZoomValue);
+  rotationInput.addEventListener('input', updateRotationValue);
+  brightnessInput.addEventListener('input', updateBrightnessValue);
+  contrastInput.addEventListener('input', updateContrastValue);
+  hueInput.addEventListener('input', updateHueValue);
+  saturateInput.addEventListener('input', updateSaturateValue);
+  invert.addEventListener('click', applyFilters);
+  blurInput.addEventListener('input', updateBlurValue);
+  revertButton.addEventListener('click', revertFilters);
+
+  function loadNewImage() {
+    const imageUrl = imageUrlInput.value;
+    image.src = imageUrl;
+	textInput.value = `<img src="${imageUrl}">`;
+  }
+
+  function applyFilters() {
+	  img = imageUrlInput.value;
+    const zoomValue = zoomInput.value;
+    const rotationValue = rotationInput.value;
+    const brightnessValue = document.getElementById('brightness').value;
+    const contrastValue = document.getElementById('contrast').value;
+    const hueValue = hueInput.value;
+    const saturateValue = document.getElementById('saturate').value;
+	const saturateValueSpan = document.getElementById('saturate-value');
+    const invertValue = invert.checked ? 100 : 0;
+    const blurValue = document.getElementById('blur').value;
+	const blurValueSpan = document.getElementById('blur-value');
+
+    // Add more filter values here
+
+    const filters = `brightness(${brightnessValue}%) contrast(${contrastValue}%) hue-rotate(${hueValue}deg) saturate(${saturateValue}%) invert(${invertValue}%) blur(${blurValue}px)`;
+    const transform = `rotate(${rotationValue}deg)`;
+
+    image.style.filter = filters;
+    image.style.transform = transform;
+    image.style.maxWidth = `${zoomValue}px`;
+
+    const cssCode = `<img src="${img}" style="filter: ${filters}; transform: ${transform}; max-width: ${zoomValue}px;">`;
+	
+    textInput.value = cssCode;
+  }
+
+function revertFilters() {
+  zoomInput.value = '100';
+  updateZoomValue();
+  rotationInput.value = '0';
+  updateRotationValue();
+  brightnessInput.value = '100';
+  updateBrightnessValue();
+  contrastInput.value = '100';
+  updateContrastValue();
+  hueInput.value = '0';
+  updateHueValue();
+  saturateInput.value = '100';
+  updateSaturateValue();
+  invert.checked = false;
+  blurInput.value = '0'
+  updateBlurValue();
+	textInput.value = "<p></p>";
+}
+
+function updateRotationValue() {
+    const rotationValue = rotationInput.value;
+    rotationValueSpan.textContent = `${rotationValue}`;
+    applyFilters();
+}
+
+  function updateZoomValue() {
+    const zoomValue = zoomInput.value;
+    zoomValueSpan.textContent = `${zoomValue}`;
+    applyFilters();
+  }
+  
+  function updateBrightnessValue() {
+	const brightnessValue = brightnessInput.value;
+	brightnessValueSpan.textContent = `${brightnessValue}`;
+	applyFilters();
+  }
+  
+  function updateContrastValue() {
+	const contrastValue = contrastInput.value;
+	contrastValueSpan.textContent = `${contrastValue}`;
+	applyFilters();
+  }
+
+  function updateHueValue() {
+    const hueValue = hueInput.value;
+    hueValueSpan.textContent = `${hueValue}`;
+    applyFilters();
+  }
+  
+  function updateSaturateValue() {
+	const saturateValue = saturateInput.value;
+	saturateValueSpan.textContent = `${saturateValue}`;
+	applyFilters();
+  }
+  
+  function updateBlurValue() {
+    const blurValue = blurInput.value;
+    blurValueSpan.textContent = `${blurValue}`;
+    applyFilters();
+  }
