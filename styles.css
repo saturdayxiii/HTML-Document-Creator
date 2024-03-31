@@ -1,96 +1,132 @@
 body {
-		font-family: Arial, sans-serif;
-		margin: 0;
-		color: white;
-		transition: background-color 0.3s ease;
-	}
+	font-family: Arial, sans-serif;
+	margin: 0;
+	color: white;
+	transition: background-color 0.3s ease;
+}
 
-	#container {
-	}
+#container {
+}
 
-	#pages {
-		position: relative;
-		top:0;
-		left:0;
-		box-sizing: border-box;
-		color: black;
-	}
+#pages {
+	position: relative;
+	top:0;
+	left:0;
+	box-sizing: border-box;
+	color: black;
+}
 
+.page {
+	position: relative;
+	box-sizing: border-box;
+	page-break-after: always;
+	outline: 1px solid black;
+	border-color: rgba(0,0,0,0.25);
+	border-style: double;
+}
+
+
+
+@media print {
 	.page {
-		position: relative;
-		box-sizing: border-box;
-		page-break-after: always;
-		outline: 1px solid black;
-		border-color: rgba(0,0,0,0.25);
-		border-style: double;
+		border: none;
+		outline: none;
 	}
+}
+
+#editor {
+	flex-direction: column;
+	padding: 10px;
+	border: 1px solid #ccc;
+	position: fixed;
+	right: 0;
+	top: 0;
+}
+
+#textedit {
+	width: 100%;
+	height: 30vh;
+}
+
+#text-input {
+	width: 95%;
+	height: 85%;
+}
+
+.titlebar {
+	width: 100%;
+	font-size: 0.8em;
+	font-weight: bold;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: rgba(255, 255, 255, 0.5);
+	padding: 3px;
+}
+
+#editoptions, #page-options, #paragraph-options {
+	padding: 5px;
+}
+
+#alignment-select {
+	margin-right: 10px;
+}
+
+#style-display {
+	width: 90%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	white-space: pre-wrap;
+	overflow: auto;
+	max-height: 200px;
+	font-size: 14px;
+	position: relative;
+}
+
+.styled-block {
+	min-height: 1em;
+	cursor: pointer;
+}
+
+.styled-block.selected {
+	border: 1px solid #888888;
+	box-sizing: border-box;
+}
+
+#default-font-size, #default-font-weight, #h1-font-size, #h1-font-weight, #h2-font-size, #h2-font-weight, #h3-font-size, #h3-font-weight, #h4-font-size, #h4-font-weight, #page-width, #page-height, #page-padding-top, #page-padding-bottom, #page-padding-left, #page-padding-right {
+	width: 50px;
+}
 
 
-	
-	@media print {
-		.page {
-			border: none;
-			outline: none;
-		}
-	}
+/* CSS Image Options Here */
 
-	#editor {
-		flex-direction: column;
-		padding: 10px;
-		border: 1px solid #ccc;
-		position: fixed;
-		right: 0;
-		top: 0;
-	}
-
-	#textedit {
-		width: 100%;
-		height: 30vh;
-	}
-
-	#text-input {
-		width: 95%;
-		height: 85%;
-	}
-
-	.titlebar {
-		width: 100%;
-		font-size: 0.8em;
-		font-weight: bold;
-		background-color: rgba(0, 0, 0, 0.5);
-		color: rgba(255, 255, 255, 0.5);
-		padding: 3px;
-	}
-
-	#editoptions, #page-options, #paragraph-options {
-		padding: 5px;
-	}
-
-	#alignment-select {
-		margin-right: 10px;
-	}
-
-	#style-display {
-		width: 90%;
-		padding: 10px;
-		border: 1px solid #ccc;
-		white-space: pre-wrap;
-		overflow: auto;
-		max-height: 200px;
-		font-size: 14px;
-		position: relative;
-	}
-
-	.styled-block {
-		min-height: 1em;
-		cursor: pointer;
-	}
-
-	.styled-block.selected {
-		border: 1px solid #888888;
-		box-sizing: border-box;
-	}
-
-	#default-font-size, #default-font-weight, #h1-font-size, #h1-font-weight, #h2-font-size, #h2-font-weight, #h3-font-size, #h3-font-weight, #h4-font-size, #h4-font-weight, #page-width, #page-height, #page-padding-top, #page-padding-bottom, #page-padding-left, #page-padding-right {
-		width: 50px;
-	}
+#image {
+	max-width: 100%;
+	height: auto;
+	border: 8px solid black;
+	filter: none; /* Initial state */
+	transform: none;
+	margin: auto;
+}
+#filter-options {
+	position: relative;
+	display: inline-block;
+	vertical-align: top;
+	text-align: center;
+}
+/* Move the image and filter options to the same line */
+#image-loading,
+#image-container {
+	display: inline-block;
+	vertical-align: top;
+	text-align: center;
+}
+/* Wrap potentially overflowing text in the CSS code block */
+#css-code {
+	white-space: pre-wrap;
+}
+.filter-option {
+	display: inline-block;
+}
+/* Adjust the width of the sliders */
+input[type="range"] {
+	width: 100%;
+}
