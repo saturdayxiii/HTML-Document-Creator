@@ -25,25 +25,91 @@
 			<div>
 				<label>BG Color:</label>
 				<input type="color" id="bg-color-picker">
-				<div class="titlebar" id="titlebar-tips">Tips</div>
-				<div id="tips" class="content" style="display: none;">
-					<table>
-						<tr>
-						<td>
-							&lt;b&gt;<b>Bold</b>&lt;/b&gt;<br>
-							&lt;i&gt;<i>Italic</i>&lt;/i&gt;<br>
-							&lt;strong&gt;<strong>Important</strong>&lt;/strong&gt;<br>
-							&lt;em&gt;<em>Emphasize</em>&lt;/em&gt;<br>
-							&lt;mark&gt;<mark>Highlight</mark>&lt;/mark&gt;<br>
-						</td>
-						<td>
-							&lt;small&gt;<small>Small</small>&lt;/small&gt;<br>
-							&lt;del&gt;<del>Delete</del>&lt;/del&gt;<br>
-							&lt;ins&gt;<ins>Insert</ins>&lt;/ins&gt;<br>
-							&lt;sup&gt;<sup>Superscript</sup>&lt;/sup&gt;<br>
-							&lt;sub&gt;<sub>Subscript</sub>&lt;/sub&gt;<br>
-						</td>
-						<td style="text-align:center">&lt;table style="border:1px solid black;text-align:center"&gt;<br>
+				<div id="titlebar-tips" style="display: flex;width: 100%;font-size: 0.8em;font-weight: bold;background-color: rgba(0, 0, 0, 0.5);color: rgba(255, 255, 255, 0.5);padding: 3px;">Tools:
+					<div class="titlebar" id="titlebar-tips-text">Text</div>|
+					<div class="titlebar" id="titlebar-tips-imgs">Img</div>|
+					<div class="titlebar" id="titlebar-tips-tables">Tables</div>
+				</div>
+				<div id="tips" class="content">
+					<div id="tips-text" style="display: none;">
+						<table>
+							<tr>
+							<td>
+								&lt;b&gt;<b>Bold</b>&lt;/b&gt;<br>
+								&lt;i&gt;<i>Italic</i>&lt;/i&gt;<br>
+								&lt;strong&gt;<strong>Important</strong>&lt;/strong&gt;<br>
+								&lt;em&gt;<em>Emphasize</em>&lt;/em&gt;<br>
+								&lt;mark&gt;<mark>Highlight</mark>&lt;/mark&gt;<br>
+							</td>
+							<td>
+								&lt;small&gt;<small>Small</small>&lt;/small&gt;<br>
+								&lt;del&gt;<del>Delete</del>&lt;/del&gt;<br>
+								&lt;ins&gt;<ins>Insert</ins>&lt;/ins&gt;<br>
+								&lt;sup&gt;<sup>Superscript</sup>&lt;/sup&gt;<br>
+								&lt;sub&gt;<sub>Subscript</sub>&lt;/sub&gt;<br>
+							</td>
+							<td style="text-align:center">
+							</td>
+							</tr>
+						</table>
+					</div>
+					<div id="tips-imgs" style="display: none;">
+						<div id="image-loading">
+							<label for="image-url">Enter Image location relatve to this html file, or a URL:</label>
+							<input type="text" id="image-url" placeholder="images/pic.jpg">
+							<button id="load-button">Load</button>
+							<button id="revert-button">Revert</button>
+						</div>
+						<br>
+						<div id="image-container">
+							<img id="image" src="images/pic.jpg" alt="Image">
+						</div>
+						<br>
+						<div id="filter-options">
+							<div class="filter-option">
+							  <label for="zoom">Zoom:</label>
+							  <input type="range" id="zoom" min="10" max="1600" value="300">
+							  <span id="zoom-value">300</span> px
+							</div>
+							<div class="filter-option">
+								<label for="rotation">Rotation:</label>
+								<input type="range" id="rotation" min="0" max="360" value="0">
+								<span id="rotation-value">0</span> degrees
+							</div>
+							<div class="filter-option">
+							  <label for="brightness">Brightness:</label>
+							  <input type="range" id="brightness" min="0" max="500" value="100">
+							  <span id="brightness-value">0</span>
+							</div>
+							<div class="filter-option">
+							  <label for="contrast">Contrast:</label>
+							  <input type="range" id="contrast" min="0" max="500" value="100">
+							  <span id="contrast-value">0</span>
+							</div>
+							<div class="filter-option">
+							  <label for="hue">hue-rotate:</label>
+							  <input type="range" id="hue" min="0" max="360" value="0">
+							  <span id="hue-value">0</span> degrees
+							</div>
+							<div class="filter-option">
+							  <label for="saturate">Saturate:</label>
+							  <input type="range" id="saturate" min="0" max="250" value="100">
+							  <span id="saturate-value">100</span>
+							</div>
+							<div class="filter-option">
+							  <label for="blur">Blur:</label>
+							  <input type="range" id="blur" min="0" max="20" step="0.1" value="0">
+							  <span id="blur-value">0</span>
+							</div>
+							<br>
+							<div class="filter-option">
+							  <label for="invert">Invert:</label>
+							  <input type="checkbox" id="invert">
+							</div>
+						</div>
+					</div>
+					<div id="tips-tables" styles="text-align: center" style="display: none;">
+						&lt;table style="border:1px solid black;text-align:center"&gt;<br>
 								<table style="border:1px solid black;text-align:center"><tr>
 									<th>&lt;tr&gt;</th>
 									<th>&lt;th&gt;Header&lt;/th&gt;</th>
@@ -54,9 +120,7 @@
 									<td>&lt;/tr&gt;</td>
 								</tr></table>
 								&lt;/table&gt;
-						</td>
-						</tr>
-					</table>
+					</div>
 				</div>
 			</div>
 			<div class="titlebar" id="titlebar-text-rules">Text Rules</div>
