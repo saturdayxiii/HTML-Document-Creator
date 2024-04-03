@@ -305,13 +305,34 @@ function renumberStyledBlocks(parentId, startId) {
 
 function calculateBlockHeight(block) {
     let blockHeight = 0;
+    const lineHeightMap = {
+        "h1": 0,
+        "h2": 0,
+        "h3": 0,
+        "h4": 0
+    };
     const paragraphs = block.querySelectorAll("p");
-    const lineHeight = parseInt(getComputedStyle(block).minHeight);
-    const totalParagraphsHeight = paragraphs.length * lineHeight;
+    const pLineHeight = parseInt(getComputedStyle(block).minHeight);
+    const totalParagraphsHeight = paragraphs.length * pLineHeight;
+
+    for (let tag in lineHeightMap) {
+        const tags = block.querySelectorAll(tag);
+        if (tags.length > 0) {
+            lineHeightMap[tag] = parseInt(getComputedStyle(tags[0]).fontSize);
+        }
+    }
+
+    for (let tag in lineHeightMap) {
+        const totalTagHeight = lineHeightMap[tag] * block.querySelectorAll(tag).length;
+        blockHeight += totalTagHeight;
+    }
+
     blockHeight += totalParagraphsHeight;
     blockHeight += block.scrollHeight;
+
     return blockHeight;
 }
+
 
 function allBreechCheck() {
     const existingPages = document.querySelectorAll(".page");
@@ -792,7 +813,7 @@ function updateStyleDisplay() {
   }
 
 function revertFilters() {
-  zoomInput.value = '100';
+  zoomInput.value = '300';
   updateZoomValue();
   rotationInput.value = '0';
   updateRotationValue();
