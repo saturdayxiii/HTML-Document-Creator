@@ -149,11 +149,27 @@ upBtn.addEventListener("click", () => {
             const parentPrev = selectedBlock.parentElement.previousElementSibling;
             if (parentPrev) {
                 const lastStyledBlock = parentPrev.querySelectorAll(".styled-block");
-                const lastId = lastStyledBlock[lastStyledBlock.length - 1].id;
-                const tempId = selectedBlock.id;
-                selectedBlock.id = lastId;
-                lastStyledBlock[lastStyledBlock.length - 1].id = tempId;
+				let lastId = lastStyledBlock[lastStyledBlock.length - 1];
+				splitIds(lastId);
+				targetOrderId++;
+				lastId = `${parentId}O${String(targetOrderId).padStart(3, '0')}`
+				selectedBlock.id = lastId;
 				moveBlocks2Parents();
+				page2check = document.getElementById(parentId);
+				breechCheck(page2check);
+				if (selectedBlock.id != lastId) {
+					lastId = lastStyledBlock[lastStyledBlock.length - 1].id;
+					selectedBlock.id = lastId;
+					lastStyledBlock[lastStyledBlock.length - 1].id = tempId;
+					moveBlocks2Parents();
+				} else {
+					targetPageId++;
+					if (targetPageId === 0) {
+					  targetPageId = 1;
+					}
+					let targetPage = `P${String(targetPageId).padStart(5, '0')}`;
+					resetStyledBlockIds(targetPage);
+				}
             }
         }
         orderBlocks();
@@ -204,7 +220,7 @@ function splitIds(block) {
 	targetPageId = parseInt(block.id.slice(1, -4));
 	parentId = `P${String(targetPageId).padStart(5, '0')}`;
 	orderId = `O${String(targetOrderId).padStart(3, '0')}`;
-	parentOrderId= `${parentId}O${orderId}`;
+	parentOrderId= `${parentId}${orderId}`;
 }
 
 function createStyledBlock(styledText) {
@@ -282,6 +298,20 @@ function orderBlocks() {
     });
 }
 
+function resetStyledBlockIds(parentId) {
+	console.log(`resetting block ids for ${parentId}`);
+    const parentElement = document.getElementById(parentId);
+    if (!parentElement) {
+        console.log('no parent found');
+        return;
+    }
+    for (let i = 0; i < parentElement.children.length; i++) {
+        const newIdNumber = i + 1;
+        const newId = `${parentId}O${String(newIdNumber).padStart(3, '0')}`;
+        parentElement.children[i].id = newId;
+    }
+}
+
 function renumberStyledBlocks(parentId, startId) {
     const parentElement = document.getElementById(parentId);
     if (!parentElement) {
@@ -294,7 +324,6 @@ function renumberStyledBlocks(parentId, startId) {
 		console.log('start index not found');
 		return;
 	}
-    let currentId = startId;
     for (let i = startIndex; i < parentElement.children.length; i++) {
         const block = parentElement.children[i];
         const lastThreeDigits = parseInt(block.id.substr(-3));
