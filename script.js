@@ -89,10 +89,12 @@ submitBtn.addEventListener("click", () => {
 });
 
 function deleteEmptyPages() {
+	console.log(`run deleteEmptyPages`);
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => {
-        if (page.children.length === 0) {
+        if (!page.querySelector('div')) {
             page.remove();
+			console.log(`page removed`);
         }
     });
 }
@@ -139,12 +141,14 @@ deleteBtn.addEventListener("click", () => {
 });
 
 upBtn.addEventListener("click", () => {
+	console.log(`moving block up`);
     if (selectedBlock) {
         const tempId = selectedBlock.id;
         const prev = selectedBlock.previousElementSibling;
         if (prev) {
             selectedBlock.id = prev.id;
             prev.id = tempId;
+			console.log(`switched w prev id`);
         } else {
             const parentPrev = selectedBlock.parentElement.previousElementSibling;
             if (parentPrev) {
@@ -157,11 +161,13 @@ upBtn.addEventListener("click", () => {
 				moveBlocks2Parents();
 				page2check = document.getElementById(parentId);
 				breechCheck(page2check);
+				console.log(`block moved to prev parent`);
 				if (selectedBlock.id != lastId) {
 					lastId = lastStyledBlock[lastStyledBlock.length - 1].id;
 					selectedBlock.id = lastId;
 					lastStyledBlock[lastStyledBlock.length - 1].id = tempId;
 					moveBlocks2Parents();
+					console.log(`block id -1 and moved to prev parent.. or something?`);
 				} else {
 					targetPageId++;
 					if (targetPageId === 0) {
@@ -169,11 +175,14 @@ upBtn.addEventListener("click", () => {
 					}
 					let targetPage = `P${String(targetPageId).padStart(5, '0')}`;
 					resetStyledBlockIds(targetPage);
+					console.log(`block moved to prev parent with no id adjustment`);
 				}
             }
         }
         orderBlocks();
+		console.log(`ran orderBlocks`);
 		allBreechCheck();
+		console.log(`ran allBreechCheck`);
         updateStyleDisplay();
     }
 });
@@ -217,13 +226,15 @@ let parentOrderId= null;
 
 function splitIds(block) {
 	targetOrderId = parseInt(block.id.substr(-3));
-	targetPageId = parseInt(block.id.slice(1, -4));
+	targetPageId = parseInt(block.id.slice(1, 6));
 	parentId = `P${String(targetPageId).padStart(5, '0')}`;
 	orderId = `O${String(targetOrderId).padStart(3, '0')}`;
 	parentOrderId= `${parentId}${orderId}`;
+	console.log(`run splitIds, targetOrderId=${targetOrderId}, targetPageId=${targetPageId}, parentId=${parentId}, orderId=${orderId}, parentOrderId=${parentOrderId}`);
 }
 
 function createStyledBlock(styledText) {
+	console.log(`run createStyledBlock`);
     let styledBlockId;
 
     if (selectedBlock) {
@@ -241,6 +252,7 @@ function createStyledBlock(styledText) {
             return;
         }
         const styledBlockCount = parentElement.querySelectorAll('.styled-block').length;
+		console.log(styledBlockCount);
         const paddedStyledBlockCount = String(styledBlockCount + 1).padStart(3, '0');
         styledBlockId = `${parentId}O${paddedStyledBlockCount}`;
     }
@@ -255,10 +267,12 @@ function createStyledBlock(styledText) {
 	} else {
 		styledBlock = `<div class="styled-block" id="${styledBlockId}">${styledText}</div>`;
 	}
+	console.log(`styledBlockId is ${styledBlockId}`);
     insertStyledBlock(styledBlock, parentId);
 }
 
 function insertStyledBlock(styledBlock, parentId) {
+	console.log(`Run instertStyledBlock`);
     const parentElement = document.getElementById(parentId);
     if (!parentElement) {
         console.error(`Parent element with id '${parentId}' not found.`);
@@ -284,6 +298,7 @@ function moveBlocks2Parents() {
 }
 
 function orderBlocks() {
+	console.log(`run orderBlocks`);
     const pageElements = document.querySelectorAll('.page');
     pageElements.forEach(page => {
         const styledBlockElements = Array.from(page.querySelectorAll('.styled-block'));
@@ -364,29 +379,32 @@ function calculateBlockHeight(block) {
 
 
 function allBreechCheck() {
+	console.log(`run allBreechCheck`);
     const existingPages = document.querySelectorAll(".page");
     existingPages.forEach(page2check => {
         breechCheck(page2check);
     });
+	deleteEmptyPages();
 }
 
 function breechCheck(page2check) {
     let totalHeight = 0;
-    const pageIdNum = parseInt(page2check.id.slice(1, -4));
+    let pageIdNum = parseInt(page2check.id.slice(1, 6));
     const styledBlocks = page2check.querySelectorAll(".styled-block");
     const movingBlock = styledBlocks[styledBlocks.length - 1];
-
+	//console.log(`breechChecking ${page2check.id}, pageIdNum= ${pageIdNum}, movingBlock= ${movingBlock.id}`);  this log specifically causes errors sometimes???
     styledBlocks.forEach(block => {
         totalHeight += calculateBlockHeight(block);
     });
 
     const compareHeight = pageHeightpx - pagePadToppx - pagePadBottompx;
+	console.log(`totalHeight: ${totalHeight} compareHeight: ${compareHeight}`);
     if (totalHeight > compareHeight) {
 		//page breeched
         if (moveBlock2NextPage(pageIdNum, movingBlock)) {
             orderBlocks();
         } else {
-            //new page needed
+            console.log(`new page needed`);
             totalPages++;
             generatePage();
             pageTraits();
@@ -406,8 +424,15 @@ function moveBlock2NextPage(pageIdNum, movingBlock) {
         renumberStyledBlocks(nextPage.id, firstBlockId);
         movingBlock.id = `${nextPage.id}O001`;
         nextPage.appendChild(movingBlock);
+        console.log(`Moved ${movingBlock.id} to ${nextPage.id}`);
         return true; // Return true if block was successfully moved
+    } else if (pageIdNum + 1 === existingPages.length) {
+        const nextPage = existingPages[pageIdNum];
+        movingBlock.id = `${nextPage.id}O001`;
+        nextPage.appendChild(movingBlock);
+        console.log(`Moved ${movingBlock.id} to ${nextPage.id}`);
     } else {
+        console.log(`No next page to move to.`);
         return false; // Return false if there is no next page
     }
 }
@@ -668,11 +693,17 @@ pageOptions.addEventListener("input", function(event) {
 });
 
 function generatePage() {
+	console.log(`run generatePage`);
 	const pagesDiv = document.getElementById("pages");
 	const newPage = document.createElement("div");
 	newPage.classList.add("page");
-	newPage.id = `P${(totalPages).toString().padStart(5, '0')}`;
+	let pageCount = document.querySelectorAll('.page').length;
+	pageCount++;
+    const paddedPageCount = String(pageCount).padStart(5, '0');
+    newPage.id = `P${paddedPageCount}`;
+	//newPage.id = `P${(totalPages).toString().padStart(5, '0')}`; totalPages is screwy and prolbably unnessecary
 	pagesDiv.appendChild(newPage);
+	console.log(`created ${paddedPageCount}`);
 }
 
 // Set the initial values for inputs---will need to check for existin styled-blocks and .pages here.
